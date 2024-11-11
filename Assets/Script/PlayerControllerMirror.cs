@@ -17,8 +17,8 @@ public class PlayerControllerMirror : NetworkBehaviour
 
     public bool startsite;
 
-    [SyncVar] public bool active;
-    [SyncVar] public int active2;
+    [SyncVar]
+    public bool active;
 
     [SyncVar]
     public bool timeOut;
@@ -33,8 +33,8 @@ public class PlayerControllerMirror : NetworkBehaviour
         singleton=this;
         FindPlayersByTag();
         time = maxTime;
-        TriggerControl();
-
+        //CmdGoStart();
+       
     }
     void FixedUpdate()
     {
@@ -59,8 +59,12 @@ public class PlayerControllerMirror : NetworkBehaviour
     {
         if (isLocalPlayer)
 
-            if (Input.GetKeyDown(KeyCode.X))
+            if ( Input.GetKeyDown(KeyCode.X))
                 CmdAddScore(1,0);
+        if (isServer && Input.GetKeyDown(KeyCode.Space))
+        {
+            CmdGoStart();
+        }
 
         if (ScoreController.singleton.redScore >= 5 && numberPlayer == 1)
         {
@@ -80,6 +84,10 @@ public class PlayerControllerMirror : NetworkBehaviour
             timeOut = true ;
             GoToStart = true;
         }
+        if (UIController.singleton.start == true) 
+        { 
+            active = true;
+        }
     }
 
     public override void OnStartServer()
@@ -87,7 +95,7 @@ public class PlayerControllerMirror : NetworkBehaviour
 
         base.OnStartServer();
         numberPlayer = 1;
-        UIController.singleton.ChangedText("Start", true);
+        //UIController.singleton.ChangedText("Start", true);
 
     }
     [Command]
@@ -112,34 +120,31 @@ public class PlayerControllerMirror : NetworkBehaviour
         //self.GetComponent<PlayerControllerMirror>().GoToStart = true;
         RpcTouch(site);
         CircleManager.singleton.GenerateNewCircle("Cube(Clone)", site, timeOut);
+        
     }
-  
+
     [ClientRpc]
     public void RpcTouch(int site)
     {
+        if (isServer == false)
+        {
+            UIController.singleton.ChangedText("Wait for host ready");
+            UIController.singleton.scoreBtn.SetActive(false);
+        }
         //CircleManager.singleton.GenerateNewCircle("Cube(Clone)", site, false);
     }
     [Command]
     public void CmdGoStart()
     {
         Debug.Log("start");
-        active = true;
-        RpcStart();
-        active2 = 2;
-    }
-    public void TriggerControl()
-    {
-
-        Debug.Log("aaa");
-        //GoStart();
-        RpcStart();
+        RpcSetActiveForAll();
     }
     [ClientRpc]
-    public void RpcStart()
+    public void RpcSetActiveForAll()
     {
-        active2 = 2;
-
-        active = true;
+        //active = true;
+        UIController.singleton.Close();
+        Debug.Log("start2");
     }
     public void OnTriggerEnter(Collider other)
     {

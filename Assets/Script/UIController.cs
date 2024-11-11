@@ -8,10 +8,16 @@ public class UIController : MonoBehaviour
     public static UIController singleton;
     public GameObject panel;
     public GameObject button;
+    public GameObject scorePanel;
+    public GameObject scoreBtn;
+    public Text redScoreText;
+    public Text blueScoreText;
     public bool start;
     void Start()
     {
         singleton = this;
+        panel.SetActive(true);
+
     }
 
     // Update is called once per frame
@@ -19,15 +25,23 @@ public class UIController : MonoBehaviour
     {
         
     }
-    public void ChangedText(string s,bool btn)
+    public void ChangedText(string s)
     {
         status.text = s;
-        panel.SetActive(true);
-        button.SetActive(btn);
+    }
+    public void Close()
+    {
+        panel.SetActive(false);
+        start = true;
+    }
+    public void ScoreBoard()
+    {
+        scorePanel.SetActive(true);
+        redScoreText.text = ScoreController.singleton.redScore.ToString();
+        blueScoreText.text = ScoreController.singleton.blueScore.ToString();
     }
     public void StartGame()
     {
-        PlayerControllerMirror.singleton.TriggerControl();
         panel.SetActive(false);
 
         if (NetworkClient.localPlayer != null)
